@@ -452,7 +452,44 @@ export async function sendImageToGroupByAccount(req, res) {
         res.status(500).json({ success: false, error: error.message });
     }
 }
+//gửi voice đến nhóm
+export async function sendmp3ToGroupByAccount(req, res) {
+    try {
+        const { imagePath: imageUrl, threadId, accountSelection } = req.body;
 
+        if (!imageUrl || !threadId) {
+            return res.status(400).json({ error: 'Đường dẫn file mp3 và threadId là bắt buộc' });
+        }
+
+        const account = getAccountFromSelection(accountSelection);
+        const imagePath = await savemp3(imageUrl);
+
+        if (!imagePath) {
+            return res.status(500).json({ success: false, error: 'Không thể lưu hình ảnh' });
+        }
+
+        const result = await account.api.sendVoice(
+            {
+                voiceUrl: [imagePath]
+            },
+            threadId,
+            ThreadType.Group
+        );
+
+        removemp3(imagePath);
+
+        res.json({
+            success: true,
+            data: result,
+            usedAccount: {
+                ownId: account.ownId,
+                phoneNumber: account.phoneNumber
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+}
 // API gửi nhiều hình ảnh đến nhóm với account selection
 export async function sendImagesToGroupByAccount(req, res) {
     try {
