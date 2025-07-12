@@ -48,3 +48,24 @@ export function removeImage(imgPath) {
         console.error(error);
     }
 }
+export async function savemp3(url) {
+    try {
+        const imgPath = "./temp.mp3";
+
+        const { data } = await axios.get(url, { responseType: "arraybuffer" });
+        fs.writeFileSync(imgPath, Buffer.from(data, "utf-8"));
+
+        return imgPath;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+}
+
+export function removemp3(imgPath) {
+    try {
+        fs.unlinkSync(imgPath);
+    } catch (error) {
+        console.error(error);
+    }
+}
